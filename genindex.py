@@ -30,6 +30,7 @@ from urllib.parse import quote
 
 DEFAULT_OUTPUT_FILE = 'index.html'
 
+# remove extension types that you do not want to display
 EXTENSION_TYPES = {
     'id_rsa': 'cert',
     'LICENSE': 'license',
@@ -189,6 +190,7 @@ def process_dir(top_dir, opts):
     index_file.write("""<!DOCTYPE html>
 <html>
 <head>
+<title>"""f'{"Index of "}{path_top_dir.name.capitalize()}'"""</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -196,7 +198,7 @@ def process_dir(top_dir, opts):
     
     path_FIXME {
         color: #ffb900 !important;
-    }    
+    }
     path {
         color: #8a8a8a;
     }
@@ -734,7 +736,7 @@ def process_dir(top_dir, opts):
 </svg>
 <header>
     <h1>"""
-                     f'{path_top_dir.name}'
+                     f'{path_top_dir.name.capitalize()}'
                      """</h1>
                  </header>
                  <main>
@@ -775,9 +777,11 @@ def process_dir(top_dir, opts):
         # - don't include index.html in the file listing
         # - skip .hidden dot files unless explicitly requested
         # - skip by regex if defined
+        # - skip by extension if not in defined list
         if (entry.name.lower() == opts.output_file.lower()) \
                 or (not opts.include_hidden and entry.name.startswith('.')) \
-                or (opts.exclude_regex and opts.exclude_regex.search(entry.name)):
+                or (opts.exclude_regex and opts.exclude_regex.search(entry.name)) \
+                or (not entry.is_dir() and (EXTENSION_TYPES.get(entry.suffix.lower()) is None)):
             continue
 
         if entry.is_dir() and opts.recursive:
